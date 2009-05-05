@@ -11,7 +11,7 @@ use strict;
 use base qw(MT::Plugin);
 use MT 4.0;
 
-our $VERSION = '1.1.1';
+our $VERSION = '1.1.2';
 
 my $plugin;
 $plugin = __PACKAGE__->new({
