@@ -11,51 +11,51 @@ use strict;
 use base qw(MT::Plugin);
 use MT 4.0;
 
-our $VERSION = '1.1';
+our $VERSION = '1.1.1';
 
 my $plugin;
 $plugin = __PACKAGE__->new({
     id              => 'HotDate',
     key             => 'hot-date',
-	name            => 'Hot Date',
-	description     => "<__trans phrase=\"<em>Hot Date</em> gives you a simple, intuitive way to select an entry&rsquo;s publishing date.\">",
-	plugin_link     => 'http://eatdrinksleepmovabletype.com/plugins/hot_date/',
-	doc_link        => 'http://eatdrinksleepmovabletype.com/plugins/hot_date/documentation.php',
-	author_name     => 'Dan Wolfgang, uiNNOVATIONS',
-	author_link     => 'http://uinnovations.com/',
-	version         => $VERSION,
+    name            => 'Hot Date',
+    description     => "<__trans phrase=\"<em>Hot Date</em> gives you a simple, intuitive way to select an entry&rsquo;s publishing date.\">",
+    plugin_link     => 'http://eatdrinksleepmovabletype.com/plugins/hot_date/',
+    doc_link        => 'http://eatdrinksleepmovabletype.com/plugins/hot_date/documentation.php',
+    author_name     => 'Dan Wolfgang, uiNNOVATIONS',
+    author_link     => 'http://uinnovations.com/',
+    version         => $VERSION,
     icon            => 'HotDate.gif',
     config_template => \&_config_template,
     settings        => new MT::PluginSettings([
         ['system_override',  { Default => 0, }],
-		['seconds',          { Default => 0, }],
-		['minutes',          { Default => 1, }],
+        ['seconds',          { Default => 0, }],
+        ['minutes',          { Default => 1, }],
         ]),
 });
 
 MT->add_plugin($plugin);
 
 sub init_registry {
-	my $plugin = shift;
-	$plugin->registry({
-		callbacks => {
-			'MT::App::CMS::template_param.edit_entry' => \&_update_param,
-			'MT::App::CMS::template_source.edit_entry' => \&_update_template,
-		}            
-	});
+    my $plugin = shift;
+    $plugin->registry({
+        callbacks => {
+            'MT::App::CMS::template_param.edit_entry' => \&_update_param,
+            'MT::App::CMS::template_source.edit_entry' => \&_update_template,
+        }            
+    });
 }
 
 
 
 sub _config_template {
-	my ($plugin, $param, $scope) = @_;
-	my $html;
-	
-	if ($scope eq 'system') {
-    	$html .= <<END_HTML;
+    my ($plugin, $param, $scope) = @_;
+    my $html;
+    
+    if ($scope eq 'system') {
+        $html .= <<END_HTML;
 <div class="setting">
 <div class="field">
-	<div><label><input value="1" type="checkbox" name="system_override" id="system_override"<TMPL_IF NAME=SYSTEM_OVERRIDE> checked</TMPL_IF> /> <__trans phrase="Click to override weblog-specific settings with the system-wide settings chosen below."></label></div>
+    <div><label><input value="1" type="checkbox" name="system_override" id="system_override"<TMPL_IF NAME=SYSTEM_OVERRIDE> checked</TMPL_IF> /> <__trans phrase="Click to override weblog-specific settings with the system-wide settings chosen below."></label></div>
 </div>
 </div>
 END_HTML
@@ -65,7 +65,7 @@ END_HTML
         $html .= <<END_HTML;
 <div class="setting">
 <div class="field">
-	<div><__trans phrase="The System Override is enabled, preventing blog-level settings. To change <em>Hot Date</em>&rsquo;s settings, go to the System Overview and choose Plugins, then modify settings there."></div>
+    <div><__trans phrase="The System Override is enabled, preventing blog-level settings. To change <em>Hot Date</em>&rsquo;s settings, go to the System Overview and choose Plugins, then modify settings there."></div>
 </div>
 </div>
 END_HTML
@@ -74,8 +74,8 @@ END_HTML
         $html .= <<END_HTML;
 <div class="setting">
 <div class="field">
-	<div><label><input value="1" type="checkbox" name="seconds" id="seconds" <TMPL_IF NAME=SECONDS>checked</TMPL_IF> /> <__trans phrase="Seconds matter. (Show the &ldquo;seconds&rdquo; selection option.)"></label></div>
-	<div style="margin-top: 6px;"><label><input value="1" type="checkbox" name="minutes" id="minutes" <TMPL_IF NAME=MINUTES>checked</TMPL_IF> /> <__trans phrase="Every minute counts. (When checked, shows every minute; when unchecked, rounds to the nearest 5 minute mark.)"></label></div>
+    <div><label><input value="1" type="checkbox" name="seconds" id="seconds" <TMPL_IF NAME=SECONDS>checked</TMPL_IF> /> <__trans phrase="Seconds matter. (Show the &ldquo;seconds&rdquo; selection option.)"></label></div>
+    <div style="margin-top: 6px;"><label><input value="1" type="checkbox" name="minutes" id="minutes" <TMPL_IF NAME=MINUTES>checked</TMPL_IF> /> <__trans phrase="Every minute counts. (When checked, shows every minute; when unchecked, rounds to the nearest 5 minute mark.)"></label></div>
 </div>
 </div>
 END_HTML
@@ -84,48 +84,54 @@ END_HTML
 
 
 sub apply_default_settings {
-	my ($plugin, $data, $scope_id) = @_;
-	if ($scope_id eq 'system') {
-		return $plugin->SUPER::apply_default_settings($data, $scope_id);
-	} else {
-		my $sys;
-		for my $setting (@{$plugin->{'settings'}}) {
-			my $key = $setting->[0];
-			next if exists($data->{$key});
-				# don't load system settings unless we need to
-			$sys ||= $plugin->get_config_obj('system')->data;
-			$data->{$key} = $sys->{$key};
-		}
-	}
+    my ($plugin, $data, $scope_id) = @_;
+    if ($scope_id eq 'system') {
+        return $plugin->SUPER::apply_default_settings($data, $scope_id);
+    } else {
+        my $sys;
+        for my $setting (@{$plugin->{'settings'}}) {
+            my $key = $setting->[0];
+            next if exists($data->{$key});
+                # don't load system settings unless we need to
+            $sys ||= $plugin->get_config_obj('system')->data;
+            $data->{$key} = $sys->{$key};
+        }
+    }
 }
 
 sub _blog_config {
-	my ($blog_id) = @_;
-	my $sys = $plugin->get_config_hash('system');
-	if ($sys->{'system_override'}) {
-		return $sys;
-	}
+    my ($blog_id) = @_;
+    my $sys = $plugin->get_config_hash('system');
+    if ($sys->{'system_override'}) {
+        return $sys;
+    }
     else {
-		return $plugin->get_config_hash('blog:' . $blog_id);
-	}
+        return $plugin->get_config_hash('blog:' . $blog_id);
+    }
 }
 
 sub _update_param {
-	my ($cb, $app, $param) = @_;
-	my $blog_id = $app->param('blog_id');
-	my $config = &_blog_config($blog_id);
-	$param->{SECONDS} = $config->{'seconds'};
-	$param->{MINUTES} = $config->{'minutes'};
+    my ($cb, $app, $param) = @_;
+    my $blog_id = $app->param('blog_id');
+    my $config = &_blog_config($blog_id);
+    $param->{SECONDS} = $config->{'seconds'};
+    $param->{MINUTES} = $config->{'minutes'};
 }
 
 sub _update_template {
-	my ($cb, $app, $template) = @_;
+    my ($cb, $app, $template) = @_;
 
+    my $oldtext;
     # The date location changes based on how the edit entry page has been customized.
-	my $oldtext = q{<input class="entry-time" name="authored_on_time" tabindex="11" value="<$mt:var name="authored_on_time" escape="html"$>" />};
+    if ($app->product_version >= 4.25 ) {
+        $oldtext = q{<input class="entry-time" name="authored_on_time" value="<$mt:var name="authored_on_time" escape="html"$>" />};
+    }
+    else {
+        $oldtext = q{<input class="entry-time" name="authored_on_time" tabindex="11" value="<$mt:var name="authored_on_time" escape="html"$>" />};
+    }
     $oldtext = quotemeta($oldtext);
     
-	my $newtext = <<'END_HTML';
+    my $newtext = <<'END_HTML';
     <a href="javascript:hd_current();" style="margin-left: 18px;"><img src="<mt:var name="static_uri">plugins/HotDate/now.png" width="16" height="16" border="0" alt="Update to current date/time" title="Update to current date/time" /></a>
     
     <br style="clear: both;" />
@@ -307,27 +313,27 @@ sub _update_template {
 
 <input class="entry-time" name="authored_on_time" style="display: none; visibility: hidden;" value="<mt:var name="authored_on_time" escape="html">" />
 
-<script type="text/javascript">	
-	function hd_assemble_date() {
-	   // Calculate hour, based on am/pm
-	   var hd_hours = document.forms['entry_form'].hd_time_hours.value;
-	   hd_hours = parseInt(hd_hours);
-	   if (document.forms['entry_form'].hd_time_ampm.value == 'pm') {
-	       hd_hours += 12;
-	       if (hd_hours == 24) { hd_hours = '12'; } //for 12:00 pm
-	   }
-	   else { // am; still in the morning.
-	       if (hd_hours == 12) { hd_hours = '00'; } // for 12:00 am
-	       hd_hours += '';
+<script type="text/javascript"> 
+    function hd_assemble_date() {
+       // Calculate hour, based on am/pm
+       var hd_hours = document.forms['entry_form'].hd_time_hours.value;
+       hd_hours = parseInt(hd_hours);
+       if (document.forms['entry_form'].hd_time_ampm.value == 'pm') {
+           hd_hours += 12;
+           if (hd_hours == 24) { hd_hours = '12'; } //for 12:00 pm
+       }
+       else { // am; still in the morning.
+           if (hd_hours == 12) { hd_hours = '00'; } // for 12:00 am
+           hd_hours += '';
            if (hd_hours.length != 2) { hd_hours = '0' + hd_hours; }
            
        }
-	   document.forms['entry_form'].authored_on_time.value = hd_hours + ':' + document.forms['entry_form'].hd_time_min.value + ':' + <mt:if name="seconds">document.forms['entry_form'].hd_time_sec.value<mt:else>'00'</mt:if>;
-	}
+       document.forms['entry_form'].authored_on_time.value = hd_hours + ':' + document.forms['entry_form'].hd_time_min.value + ':' + <mt:if name="seconds">document.forms['entry_form'].hd_time_sec.value<mt:else>'00'</mt:if>;
+    }
 
-	function hd_grab() { // Get the time from the authored_on_time
-	                     // field. Important, in case the entry was
-	                     // already saved, we need the right time.
+    function hd_grab() { // Get the time from the authored_on_time
+                         // field. Important, in case the entry was
+                         // already saved, we need the right time.
         var hd_now = document.forms['entry_form'].authored_on_time.value;
         var hd_hours = hd_now.substring(0, 2);
         hd_hours = parseInt(hd_hours, 10);
@@ -338,7 +344,7 @@ sub _update_template {
             hd_hours -= 12;
             document.forms['entry_form'].hd_time_ampm.value = 'pm';
             if (hd_hours == 0) { hd_hours = '12'; } // for 12:00 pm
-	        hd_hours = hd_hours + '';
+            hd_hours = hd_hours + '';
             document.forms['entry_form'].hd_time_hours.value = hd_hours;
         }
         else { // am
@@ -431,11 +437,11 @@ sub _update_template {
     }
 
     hd_grab();
-</script>	
+</script>   
 
 END_HTML
 
-	$$template =~ s/$oldtext/$newtext/;
+    $$template =~ s/$oldtext/$newtext/;
 }
 
 1;
