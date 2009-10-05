@@ -385,9 +385,10 @@ sub _update_template {
     function hd_current() { // Get the current date and time.
         var hd_now = new Date;
         var hd_now_month = hd_now.getMonth() + 1;
+        hd_now_month += ''; // Necessary so that the .length works
         if (hd_now_month.length != 2) { hd_now_month = '0' + hd_now_month; }
         var hd_now_date = hd_now.getDate();
-        hd_now_date += '';
+        hd_now_date += ''; // Necessary so that the .length works
         if (hd_now_date.length != 2) { hd_now_date = '0' + hd_now_date; }
         document.forms['entry_form'].authored_on_date.value = hd_now.getFullYear() + '-' + hd_now_month + '-' + hd_now_date;
         var hd_current_hour = hd_now.getHours();
