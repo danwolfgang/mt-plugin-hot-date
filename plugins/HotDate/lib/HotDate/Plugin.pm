@@ -1,89 +1,59 @@
-# HotDate.pl
-# Hot Date plugin for Movable Type
-# http://www.eatdrinksleepmovabletype.com/plugins/hot_date/
-# by Dan Wolfgang, uiNNOVATIONS
-# http://www.uinnovations.com/
-# last modified 08/9/2007
-
-package MT::Plugin::HotDate;
+package HotDate::Plugin;
 
 use strict;
-use base qw(MT::Plugin);
-use MT 4.0;
+use warnings;
 
-our $VERSION = '1.1.2';
-
-my $plugin;
-$plugin = __PACKAGE__->new({
-    id              => 'HotDate',
-    key             => 'hot-date',
-    name            => 'Hot Date',
-    description     => "<__trans phrase=\"<em>Hot Date</em> gives you a simple, intuitive way to select an entry&rsquo;s publishing date.\">",
-    plugin_link     => 'http://eatdrinksleepmovabletype.com/plugins/hot_date/',
-    doc_link        => 'http://eatdrinksleepmovabletype.com/plugins/hot_date/documentation.php',
-    author_name     => 'Dan Wolfgang, uiNNOVATIONS',
-    author_link     => 'http://uinnovations.com/',
-    version         => $VERSION,
-    icon            => 'HotDate.gif',
-    config_template => \&_config_template,
-    settings        => new MT::PluginSettings([
-        ['system_override',  { Default => 0, }],
-        ['seconds',          { Default => 0, }],
-        ['minutes',          { Default => 1, }],
-        ]),
-});
-
-MT->add_plugin($plugin);
-
-sub init_registry {
-    my $plugin = shift;
-    $plugin->registry({
-        callbacks => {
-            'MT::App::CMS::template_param.edit_entry' => \&_update_param,
-            'MT::App::CMS::template_source.edit_entry' => \&_update_template,
-        }            
-    });
-}
-
-
-
-sub _config_template {
+sub config_template {
     my ($plugin, $param, $scope) = @_;
     my $html;
-    
+
+    # At the system level, an override switch exists. This switch causes
+    # the selected options to be applied to all blogs.
     if ($scope eq 'system') {
         $html .= <<END_HTML;
-<div class="setting">
-<div class="field">
-    <div><label><input value="1" type="checkbox" name="system_override" id="system_override"<TMPL_IF NAME=SYSTEM_OVERRIDE> checked</TMPL_IF> /> <__trans phrase="Click to override weblog-specific settings with the system-wide settings chosen below."></label></div>
-</div>
-</div>
+<mtapp:Setting
+    id="system_override"
+    label="System Override">
+    <input value="1" type="checkbox" name="system_override" id="system_override"<mt:If name="system_override"> checked="checked"</mt:If> /> 
+    <label for="system_override"><__trans phrase="Click to override weblog-specific settings with the system-wide settings chosen below."></label>
+</mtapp:Setting>
 END_HTML
     }
+
+    # Build the blog level plugin settings screen. If the system override
+    # is enabled, just provide an explanation to the user; otherwise show
+    # configuration options.
     my $config = $plugin->get_config_hash('system');
     if ( ($config->{'system_override'}) && ($scope =~ /blog/) ) {
         $html .= <<END_HTML;
-<div class="setting">
-<div class="field">
-    <div><__trans phrase="The System Override is enabled, preventing blog-level settings. To change <em>Hot Date</em>&rsquo;s settings, go to the System Overview and choose Plugins, then modify settings there."></div>
-</div>
-</div>
+<mtapp:Setting
+    id="system_override_enabled"
+    label="System Override Enabled">
+    <__trans phrase="The System Override is enabled, preventing blog-level settings. To change <em>Hot Date</em>&rsquo;s settings, go to the System Overview and choose Plugins, then modify settings there.">
+</mtapp:Setting>
 END_HTML
     }
     else {
         $html .= <<END_HTML;
-<div class="setting">
-<div class="field">
-    <div><label><input value="1" type="checkbox" name="seconds" id="seconds" <TMPL_IF NAME=SECONDS>checked</TMPL_IF> /> <__trans phrase="Seconds matter. (Show the &ldquo;seconds&rdquo; selection option.)"></label></div>
-    <div style="margin-top: 6px;"><label><input value="1" type="checkbox" name="minutes" id="minutes" <TMPL_IF NAME=MINUTES>checked</TMPL_IF> /> <__trans phrase="Every minute counts. (When checked, shows every minute; when unchecked, rounds to the nearest 5 minute mark.)"></label></div>
-</div>
-</div>
+<mtapp:Setting
+    id="minutes"
+    label="Every Minute Counts">
+    <input value="1" type="checkbox" name="minutes" id="minutes" <mt:If name="minutes">checked</mt:If> /> 
+    <label for="minutes"><__trans phrase="When checked, shows every minute; when unchecked, rounds to the nearest 5 minute mark."></label>
+</mtapp:Setting>
+<mtapp:Setting
+    id="seconds"
+    label="Seconds Matter">
+    <input value="1" type="checkbox" name="seconds" id="seconds" <mt:If name="seconds">checked="checked"</mt:If> /> 
+    <label for="seconds"><__trans phrase="Show the &ldquo;seconds&rdquo; selection option."></label>
+</mtapp:Setting>
 END_HTML
     }
 }
 
-
 sub apply_default_settings {
+    # Make system-level selections "trickle-down" to become default
+    # options at the blog level.
     my ($plugin, $data, $scope_id) = @_;
     if ($scope_id eq 'system') {
         return $plugin->SUPER::apply_default_settings($data, $scope_id);
@@ -100,7 +70,11 @@ sub apply_default_settings {
 }
 
 sub _blog_config {
+    # Grab the configuration settings. If the system override is enabled, 
+    # then return the system-level settings. Otherwise return the blog-
+    # level settings.
     my ($blog_id) = @_;
+    my $plugin = MT->component('hotdate');
     my $sys = $plugin->get_config_hash('system');
     if ($sys->{'system_override'}) {
         return $sys;
@@ -110,33 +84,41 @@ sub _blog_config {
     }
 }
 
-sub _update_param {
+sub update_param {
     my ($cb, $app, $param) = @_;
     my $blog_id = $app->param('blog_id');
-    my $config = &_blog_config($blog_id);
-    $param->{SECONDS} = $config->{'seconds'};
-    $param->{MINUTES} = $config->{'minutes'};
+    my $config = _blog_config($blog_id);
+    $param->{seconds} = $config->{'seconds'};
+    $param->{minutes} = $config->{'minutes'};
 }
 
-sub _update_template {
+sub update_template {
     my ($cb, $app, $template) = @_;
 
+    # Hot Date works with MT 4.0 through 4.24, MT 4.25 and greater, and
+    # Melody. (Actually, MT 4.25 and greater and Melody both use the same
+    # field.) So, first we'll check for old versions of MT, then newer
+    # versions and Melody.
     my $oldtext;
-    # The date location changes based on how the edit entry page has been customized.
-    if ($app->product_version >= 4.25 ) {
-        $oldtext = q{<input class="entry-time" name="authored_on_time" value="<$mt:var name="authored_on_time" escape="html"$>" />};
-    }
-    else {
+    if ($app->product_name eq 'Movable Type' 
+        && $app->product_version < 4.25
+      )
+    {
         $oldtext = q{<input class="entry-time" name="authored_on_time" tabindex="11" value="<$mt:var name="authored_on_time" escape="html"$>" />};
     }
+    else {
+        # MT 4.25 and greater, and Melody
+        $oldtext = q{<input class="entry-time" name="authored_on_time" value="<$mt:var name="authored_on_time" escape="html"$>" />};
+    }
     $oldtext = quotemeta($oldtext);
-    
+
+    # Build the new fields. Lots of HTML!
     my $newtext = <<'END_HTML';
-    <a href="javascript:hd_current();" style="margin-left: 18px;"><img src="<mt:var name="static_uri">plugins/HotDate/now.png" width="16" height="16" border="0" alt="Update to current date/time" title="Update to current date/time" /></a>
+    <a href="javascript:hd_current();" style="margin-left: 18px;"><img src="<mt:PluginStaticWebPath component="hotdate">now.png" width="16" height="16" border="0" alt="Update to current date/time" title="Update to current date/time" /></a>
     
     <br style="clear: both;" />
     
-<div style="margin-top: 5px; width: 100%;;">
+<div style="margin-top: 5px; width: 100%;">
 
     <select name="hd_time_hour" id="hd_time_hours" onchange="hd_assemble_date();" style="margin-right: 4px;">
         <option style="float: none;" value="1">1</option>
@@ -311,7 +293,7 @@ sub _update_template {
     </select>
 </div>
 
-<input class="entry-time" name="authored_on_time" style="display: none; visibility: hidden;" value="<mt:var name="authored_on_time" escape="html">" />
+<input class="entry-time" name="authored_on_time" style="display: none; visibility: hidden;" value="<mt:Var name="authored_on_time" escape="html">" />
 
 <script type="text/javascript"> 
     function hd_assemble_date() {
@@ -326,14 +308,15 @@ sub _update_template {
            if (hd_hours == 12) { hd_hours = '00'; } // for 12:00 am
            hd_hours += '';
            if (hd_hours.length != 2) { hd_hours = '0' + hd_hours; }
-           
        }
-       document.forms['entry_form'].authored_on_time.value = hd_hours + ':' + document.forms['entry_form'].hd_time_min.value + ':' + <mt:if name="seconds">document.forms['entry_form'].hd_time_sec.value<mt:else>'00'</mt:if>;
+
+       // Update the "real" date-time stamp field
+       document.forms['entry_form'].authored_on_time.value = hd_hours + ':' + document.forms['entry_form'].hd_time_min.value + ':' + <mt:If name="seconds">document.forms['entry_form'].hd_time_sec.value<mt:Else>'00'</mt:If>;
     }
 
-    function hd_grab() { // Get the time from the authored_on_time
-                         // field. Important, in case the entry was
-                         // already saved, we need the right time.
+    function hd_grab() { 
+        // Get the time from the authored_on_time field. Important, in case
+        // the entry was already saved, we need the right time.
         var hd_now = document.forms['entry_form'].authored_on_time.value;
         var hd_hours = hd_now.substring(0, 2);
         hd_hours = parseInt(hd_hours, 10);
@@ -446,4 +429,5 @@ END_HTML
 }
 
 1;
+
 __END__
