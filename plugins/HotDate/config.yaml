@@ -2,7 +2,7 @@ name: 'Hot Date'
 id: hotdate
 key: hotdate
 description: '<em>Hot Date</em> gives you a simple, intuitive way to select an entry&rsquo;s publishing date.'
-#icon: 'HotDate.gif'
+icon: '../../support/plugins/hotdate/HotDate.gif'
 plugin_link: http://eatdrinksleepmovabletype.com/plugins/hot_date/
 doc_link: http://eatdrinksleepmovabletype.com/plugins/hot_date/documentation.php
 author_name: 'Dan Wolfgang, uiNNOVATIONS'
