@@ -320,9 +320,7 @@ sub update_template {
         var hd_now = document.forms['entry_form'].authored_on_time.value;
         var hd_hours = hd_now.substring(0, 2);
         hd_hours = parseInt(hd_hours, 10);
-        if ( (hd_now.substring(3, 5) == 57) || (hd_now.substring(3, 5) == 58) || (hd_now.substring(3, 5) == 59) ) {
-            hd_hours++; // if it's near the end of the hour, round up to the next hour
-        }
+
         if (hd_hours >= 12) { //pm
             hd_hours -= 12;
             document.forms['entry_form'].hd_time_ampm.value = 'pm';
@@ -337,6 +335,7 @@ sub update_template {
             document.forms['entry_form'].hd_time_ampm.value = 'am';
             document.forms['entry_form'].hd_time_hours.value = hd_hours;
         }
+
 <mt:if name="minutes">
         document.forms['entry_form'].hd_time_min.value = hd_now.substring(3, 5);
 <mt:else>
