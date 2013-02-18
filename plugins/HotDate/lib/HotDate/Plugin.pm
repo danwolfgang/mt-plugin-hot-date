@@ -116,7 +116,14 @@ sub update_template {
 
     # Build the new fields. Lots of HTML!
     my $newtext = <<'END_HTML';
-    <a href="javascript:hd_current();" style="margin-left: 18px;"><img src="<mt:PluginStaticWebPath component="hotdate">now.png" width="16" height="16" border="0" alt="Update to current date/time" title="Update to current date/time" /></a>
+    <a href="javascript:hd_current();" style="margin-left: 18px;">
+        <img src="<mt:StaticWebPath>support/plugins/hotdate/now.png"
+            width="16"
+            height="16"
+            border="0"
+            alt="Update to current date/time"
+            title="Update to current date/time" />
+    </a>
 
     <br style="clear: both;" />
 
