@@ -102,7 +102,15 @@ sub update_template {
     # field.) So, first we'll check for old versions of MT, then newer
     # versions and Melody.
     my $oldtext;
+    # MT5
     if (
+        $app->product_name eq 'Movable Type'
+        && $app->product_version > 5
+    ) {
+        $oldtext = q{<span class="separator"> <__trans phrase="@"></span> <input type="text" class="text time <mt:if name="status_future"><mt:if name="can_publish_post"> highlight</mt:if></mt:if>" name="authored_on_time" value="<$mt:var name="authored_on_time" escape="html"$>" />};
+    }
+    # MT 4.25 and older
+    elsif (
         $app->product_name eq 'Movable Type'
         && $app->product_version < 4.25
     ) {
