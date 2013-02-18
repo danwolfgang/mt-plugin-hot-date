@@ -7,7 +7,7 @@ plugin_link: http://eatdrinksleepmovabletype.com/plugins/hot_date/
 doc_link: http://eatdrinksleepmovabletype.com/plugins/hot_date/documentation.php
 author_name: 'Dan Wolfgang, uiNNOVATIONS'
 author_link: http://uinnovations.com/
-version: 2.0.1
+version: 2.1.0
 static_version: 1
 
 config_template:
