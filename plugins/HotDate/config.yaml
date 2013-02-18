@@ -25,4 +25,3 @@ settings:
 callbacks:
     MT::App::CMS::template_param.edit_entry: $HotDate::HotDate::Plugin::update_param
     MT::App::CMS::template_source.edit_entry: $HotDate::HotDate::Plugin::update_template
-

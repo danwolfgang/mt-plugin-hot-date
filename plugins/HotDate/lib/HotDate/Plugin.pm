@@ -14,7 +14,7 @@ sub config_template {
 <mtapp:Setting
     id="system_override"
     label="System Override">
-    <input value="1" type="checkbox" name="system_override" id="system_override"<mt:If name="system_override"> checked="checked"</mt:If> /> 
+    <input value="1" type="checkbox" name="system_override" id="system_override"<mt:If name="system_override"> checked="checked"</mt:If> />
     <label for="system_override"><__trans phrase="Click to override weblog-specific settings with the system-wide settings chosen below."></label>
 </mtapp:Setting>
 END_HTML
@@ -38,22 +38,22 @@ END_HTML
 <mtapp:Setting
     id="minutes"
     label="Every Minute Counts">
-    <input value="1" type="checkbox" name="minutes" id="minutes" <mt:If name="minutes">checked</mt:If> /> 
+    <input value="1" type="checkbox" name="minutes" id="minutes" <mt:If name="minutes">checked</mt:If> />
     <label for="minutes"><__trans phrase="When checked, shows every minute; when unchecked, rounds to the nearest 5 minute mark."></label>
 </mtapp:Setting>
 <mtapp:Setting
     id="seconds"
     label="Seconds Matter">
-    <input value="1" type="checkbox" name="seconds" id="seconds" <mt:If name="seconds">checked="checked"</mt:If> /> 
+    <input value="1" type="checkbox" name="seconds" id="seconds" <mt:If name="seconds">checked="checked"</mt:If> />
     <label for="seconds"><__trans phrase="Show the &ldquo;seconds&rdquo; selection option."></label>
 </mtapp:Setting>
 END_HTML
     }
 }
 
+# Make system-level selections "trickle-down" to become default options at the
+# blog level.
 sub apply_default_settings {
-    # Make system-level selections "trickle-down" to become default
-    # options at the blog level.
     my ($plugin, $data, $scope_id) = @_;
     if ($scope_id eq 'system') {
         return $plugin->SUPER::apply_default_settings($data, $scope_id);
@@ -69,10 +69,9 @@ sub apply_default_settings {
     }
 }
 
+# Grab the configuration settings. If the system override is enabled, then
+# return the system-level settings. Otherwise return the blog-level settings.
 sub _blog_config {
-    # Grab the configuration settings. If the system override is enabled, 
-    # then return the system-level settings. Otherwise return the blog-
-    # level settings.
     my ($blog_id) = @_;
     my $plugin = MT->component('hotdate');
     my $sys = $plugin->get_config_hash('system');
@@ -84,14 +83,17 @@ sub _blog_config {
     }
 }
 
+# Make the "seconds" and "minutes" plugin Settings available to the Edit Entry
+# screen.
 sub update_param {
     my ($cb, $app, $param) = @_;
     my $blog_id = $app->param('blog_id');
-    my $config = _blog_config($blog_id);
+    my $config  = _blog_config($blog_id);
     $param->{seconds} = $config->{'seconds'};
     $param->{minutes} = $config->{'minutes'};
 }
 
+# Update the Edit Entry screen with the new "picker" options.
 sub update_template {
     my ($cb, $app, $template) = @_;
 
@@ -100,14 +102,14 @@ sub update_template {
     # field.) So, first we'll check for old versions of MT, then newer
     # versions and Melody.
     my $oldtext;
-    if ($app->product_name eq 'Movable Type' 
+    if (
+        $app->product_name eq 'Movable Type'
         && $app->product_version < 4.25
-      )
-    {
+    ) {
         $oldtext = q{<input class="entry-time" name="authored_on_time" tabindex="11" value="<$mt:var name="authored_on_time" escape="html"$>" />};
     }
+    # MT 4.25 and greater, and Melody
     else {
-        # MT 4.25 and greater, and Melody
         $oldtext = q{<input class="entry-time" name="authored_on_time" value="<$mt:var name="authored_on_time" escape="html"$>" />};
     }
     $oldtext = quotemeta($oldtext);
@@ -115,9 +117,9 @@ sub update_template {
     # Build the new fields. Lots of HTML!
     my $newtext = <<'END_HTML';
     <a href="javascript:hd_current();" style="margin-left: 18px;"><img src="<mt:PluginStaticWebPath component="hotdate">now.png" width="16" height="16" border="0" alt="Update to current date/time" title="Update to current date/time" /></a>
-    
+
     <br style="clear: both;" />
-    
+
 <div style="margin-top: 5px; width: 100%;">
 
     <select name="hd_time_hour" id="hd_time_hours" onchange="hd_assemble_date();" style="margin-right: 4px;">
@@ -293,9 +295,9 @@ sub update_template {
     </select>
 </div>
 
-<input class="entry-time" name="authored_on_time" style="display: none; visibility: hidden;" value="<mt:Var name="authored_on_time" escape="html">" />
+<input name="authored_on_time" style="display: none; visibility: hidden;" value="<mt:Var name="authored_on_time" escape="html">" />
 
-<script type="text/javascript"> 
+<script type="text/javascript">
     function hd_assemble_date() {
        // Calculate hour, based on am/pm
        var hd_hours = document.forms['entry_form'].hd_time_hours.value;
@@ -314,7 +316,7 @@ sub update_template {
        document.forms['entry_form'].authored_on_time.value = hd_hours + ':' + document.forms['entry_form'].hd_time_min.value + ':' + <mt:If name="seconds">document.forms['entry_form'].hd_time_sec.value<mt:Else>'00'</mt:If>;
     }
 
-    function hd_grab() { 
+    function hd_grab() {
         // Get the time from the authored_on_time field. Important, in case
         // the entry was already saved, we need the right time.
         var hd_now = document.forms['entry_form'].authored_on_time.value;
@@ -340,7 +342,7 @@ sub update_template {
         document.forms['entry_form'].hd_time_min.value = hd_now.substring(3, 5);
 <mt:else>
         var hd_round_min = hd_now.substring(4, 5); //grab the last digit of the minute space
-        hd_round_min = parseInt(hd_round_min); 
+        hd_round_min = parseInt(hd_round_min);
         if ( (hd_round_min == 0) || (hd_round_min == 1) || (hd_round_min == 2) ) {
             document.forms['entry_form'].hd_time_min.value = hd_now.substring(3, 4) + '0';
         }
@@ -385,7 +387,7 @@ sub update_template {
         }
         var hd_current_min = hd_now.getMinutes(); // Calculate minutes
         hd_current_min += '';
-        if (hd_current_min.length != 2) { hd_current_min = '0' + hd_current_min; }        
+        if (hd_current_min.length != 2) { hd_current_min = '0' + hd_current_min; }
 <mt:if name="minutes">
         document.forms['entry_form'].hd_time_min.value = hd_current_min;
 <mt:else>
@@ -412,15 +414,15 @@ sub update_template {
 <mt:if name="seconds">
         var hd_current_sec = hd_now.getSeconds(); //Calculate seconds
         hd_current_sec += '';
-        if (hd_current_sec.length != 2) { hd_current_sec = '0' + hd_current_sec; }        
+        if (hd_current_sec.length != 2) { hd_current_sec = '0' + hd_current_sec; }
         document.forms['entry_form'].hd_time_sec.value = hd_current_sec;
 </mt:if>
-        
+
         hd_assemble_date();
     }
 
     hd_grab();
-</script>   
+</script>
 
 END_HTML
 
