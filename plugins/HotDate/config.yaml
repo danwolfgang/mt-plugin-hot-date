@@ -1,13 +1,13 @@
-name: 'Hot Date'
-id: hotdate
-key: hotdate
-description: '<em>Hot Date</em> gives you a simple, intuitive way to select an entry&rsquo;s publishing date.'
-icon: '../../support/plugins/hotdate/HotDate.gif'
-plugin_link: http://eatdrinksleepmovabletype.com/plugins/hot_date/
-doc_link: http://eatdrinksleepmovabletype.com/plugins/hot_date/documentation.php
-author_name: 'Dan Wolfgang, uiNNOVATIONS'
-author_link: http://uinnovations.com/
 version: 2.1.0
+name:           'Hot Date'
+id:             hotdate
+key:            hotdate
+description:    '<em>Hot Date</em> gives you a simple, intuitive way to select an entry&rsquo;s publishing date.'
+icon:           '../../support/plugins/hotdate/HotDate.gif'
+plugin_link:    http://eatdrinksleepmovabletype.com/plugins/hot_date/
+doc_link:       http://eatdrinksleepmovabletype.com/plugins/hot_date/documentation.php
+author_name:    'Dan Wolfgang, uiNNOVATIONS'
+author_link:    http://uinnovations.com/
 static_version: 1
 
 config_template:
@@ -23,5 +23,5 @@ settings:
         default: 1
 
 callbacks:
-    MT::App::CMS::template_param.edit_entry: $HotDate::HotDate::Plugin::update_param
+    MT::App::CMS::template_param.edit_entry:  $HotDate::HotDate::Plugin::update_param
     MT::App::CMS::template_source.edit_entry: $HotDate::HotDate::Plugin::update_template
