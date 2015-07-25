@@ -392,10 +392,12 @@ sub update_template {
         var hd_current_hour = hd_now.getHours();
         if (hd_current_hour >= 12) {
            hd_current_hour -= 12;
+           if (hd_current_hour == 0) { hd_current_hour = '12'; } // for 12 pm
            document.forms['entry_form'].hd_time_hours.value = hd_current_hour;
            document.forms['entry_form'].hd_time_ampm.value = 'pm';
         }
         else {
+           if (hd_current_hour == 0) { hd_current_hour = '12'; } // for 12 am
            document.forms['entry_form'].hd_time_hours.value = hd_current_hour;
            document.forms['entry_form'].hd_time_ampm.value = 'am';
         }
